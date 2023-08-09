@@ -32,6 +32,7 @@ export default function Home() {
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
+  const [metaMaskAddress, setMetaMaskAddress] = useState("Address Not Found");
 
   const deadline = "August, 11, 2023";
 
@@ -52,18 +53,30 @@ export default function Home() {
 
   const options = ["APR", "Earned", "Total staked", "Latest"];
   const defaultOption = "Hot";
-  const chains = [arbitrum, mainnet, polygon, fantomTestnet, fantom, bsc];
-  const projectId = "b0787f1586ad8637bb3931d49d2d5e47";
+  // const chains = [arbitrum, mainnet, polygon, fantomTestnet, fantom, bsc];
+  // const projectId = "b0787f1586ad8637bb3931d49d2d5e47";
 
-  const { publicClient } = configureChains(chains, [
-    w3mProvider({ projectId }),
-  ]);
-  const wagmiConfig = createConfig({
-    autoConnect: true,
-    connectors: w3mConnectors({ projectId, chains }),
-    publicClient,
-  });
-  const ethereumClient = new EthereumClient(wagmiConfig, chains);
+  // const { publicClient } = configureChains(chains, [
+  //   w3mProvider({ projectId }),
+  // ]);
+  // const wagmiConfig = createConfig({
+  //   autoConnect: true,
+  //   connectors: w3mConnectors({ projectId, chains }),
+  //   publicClient,
+  // });
+  // const ethereumClient = new EthereumClient(wagmiConfig, chains);
+
+  const connectMetamask = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const address = await signer.getAddress();
+      setMetaMaskAddress(address);
+    } else {
+      setMetaMaskAddress("MetaMask not detected");
+    }
+  };
 
   const provider = new ethers.providers.JsonRpcProvider(
     "https://rpc.ankr.com/fantom_testnet/"
@@ -96,8 +109,8 @@ export default function Home() {
 
   return (
     <>
-      <WagmiConfig config={wagmiConfig}></WagmiConfig>
-      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
+      {/* <WagmiConfig config={wagmiConfig}></WagmiConfig>
+      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} /> */}
       <div className={styles.Header}>
         <text className={styles.ftmswaptext}>FTM Swap</text>
         <text style={{ fontWeight: "normal" }}>Trade</text>
@@ -107,7 +120,30 @@ export default function Home() {
         <Image src={img1} alt="img1"></Image>
         <Image src={img2} alt="img2"></Image>
         <button className={styles.smatChainLayout}>FTM Smart Chain</button>
-        <Web3Button />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <button
+            className={styles.smatChainLayout}
+            onClick={() => connectMetamask()}
+          >
+            Connect MetaMask
+          </button>
+          <text
+            style={{
+              fontWeight: "normal",
+              marginTop: "20px",
+              fontSize: "12px",
+            }}
+          >
+            {metaMaskAddress}
+          </text>
+        </div>
+        {/* <Web3Button /> */}
       </div>
       <main className={styles.main}>
         <div className={styles.syruppoolheader}>
